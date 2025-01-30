@@ -1,185 +1,21 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-// Get the container element
-const container = document.getElementById('hero');
-if (!container) {
-    console.error('Container element with id "hero" not found');
-    throw new Error('Container element not found');
-}
-
-const scene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
-});
-const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-const loader = new GLTFLoader();
-const controls = new OrbitControls(camera, renderer.domElement);
-
-// Set background color
-scene.background = new THREE.Color(0x1a1a1a);
-
-// Add lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 15);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
-directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);
-
-// Create a TextureLoader to load our brand
-const textureLoader = new THREE.TextureLoader();
-
-// Set renderer size to match container
-renderer.setSize(container.clientWidth, container.clientHeight);
-container.appendChild(renderer.domElement);
-
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-//scene.add(cube);
-
-var globets = null;
-
-camera.position.z = 5;
-
-// Create particles
-const particlesGeometry = new THREE.BufferGeometry();
-const particlesCount = 100;
-const posArray = new Float32Array(particlesCount * 3);
-const velocityArray = new Float32Array(particlesCount * 3);
-
-// Initialize particles with random positions and velocities
-for (let i = 0; i < particlesCount * 3; i++) {
-    // Position
-    posArray[i] = (Math.random() - 0.5) * 10;
-    // Velocity
-    velocityArray[i] = (Math.random() - 0.5) * 0.02;
-}
-
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-
-// Create material for particles
-const particlesMaterial = new THREE.PointsMaterial({
-    size: 0.05,
-    color: 0xb233ff,
-    transparent: true,
-    opacity: 0.8
-});
-
-// Create the particle system
-const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-scene.add(particlesMesh);
-
-// Create lines between nearby particles
-const linesMaterial = new THREE.LineBasicMaterial({
-    color: 0xb233ff,
-    transparent: true,
-    opacity: 0.3
-});
-
-let linesGeometry = new THREE.BufferGeometry();
-let linesPoints = [];
-const maxDistance = 2; // Maximum distance for connecting particles
-
-const linesMesh = new THREE.LineSegments(linesGeometry, linesMaterial);
-scene.add(linesMesh);
-
-// Load the brand image
-textureLoader.load(
-    'public/mozzart.png',
-    function (texture) {
-        // Create a plane geometry to display the image
-        const geometry = new THREE.PlaneGeometry(5, 4); // Adjust size as needed
-        const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide // Makes the plane visible from both sides
-        });
-        const plane = new THREE.Mesh(geometry, material);
-        scene.add(plane);
-    },
-    undefined,
-    function (error) {
-        console.error('Error loading texture:', error);
-    }
-);
-
-function animate() {
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-
-    if (globets !== null) {
-        globets.rotation.y += 0.01;
-    }
-
-    // Update particle positions
-    const positions = particlesGeometry.attributes.position.array;
-    for (let i = 0; i < particlesCount * 3; i++) {
-        positions[i] += velocityArray[i];
-
-        // Bounce off boundaries
-        if (Math.abs(positions[i]) > 5) {
-            velocityArray[i] *= -1;
-        }
-    }
-    particlesGeometry.attributes.position.needsUpdate = true;
-
-    // Update connecting lines
-    updateLines();
-
-    renderer.render(scene, camera);
-}
-
-
-function updateLines() {
-    linesPoints = [];
-    const positions = particlesGeometry.attributes.position.array;
-
-    // Check distances between particles and create lines for close ones
-    for (let i = 0; i < particlesCount; i++) {
-        for (let j = i + 1; j < particlesCount; j++) {
-            const x1 = positions[i * 3];
-            const y1 = positions[i * 3 + 1];
-            const z1 = positions[i * 3 + 2];
-
-            const x2 = positions[j * 3];
-            const y2 = positions[j * 3 + 1];
-            const z2 = positions[j * 3 + 2];
-
-            const distance = Math.sqrt(
-                Math.pow(x2 - x1, 2) +
-                Math.pow(y2 - y1, 2) +
-                Math.pow(z2 - z1, 2)
-            );
-
-            if (distance < maxDistance) {
-                linesPoints.push(x1, y1, z1);
-                linesPoints.push(x2, y2, z2);
-            }
-        }
-    }
-
-    // Update lines geometry
-    linesGeometry.dispose();
-    linesGeometry = new THREE.BufferGeometry();
-    linesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linesPoints, 3));
-}
-
-// Resize handler now uses container dimensions
-function onWindowResize() {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-}
-
-// Add event listener for window resize
-window.addEventListener('resize', onWindowResize);
-
-// Start animation loop
-renderer.setAnimationLoop(animate);
-
-// Initial resize
-onWindowResize();
+import*as T from'three';import{GLTFLoader}from'three/addons/loaders/GLTFLoader.js';import{OrbitControls}from'three/addons/controls/OrbitControls.js';
+const c=document.getElementById('hero');if(!c)throw'No container';
+const s=new T.Scene,r=new T.WebGLRenderer({antialias:!0,alpha:!0}),m=new T.PerspectiveCamera(75,c.clientWidth/c.clientHeight,.1,1e3);
+s.background=new T.Color(0x1a1a1a);
+s.add(new T.AmbientLight(0xffffff,15));
+const d=new T.DirectionalLight(0xffffff,10);d.position.set(5,5,5);s.add(d);
+r.setSize(c.clientWidth,c.clientHeight);c.appendChild(r.domElement);
+let f=!1,t=Math.PI/6,u=0;m.position.z=5;
+const g=new T.BufferGeometry,n=100,p=new Float32Array(3*n),v=new Float32Array(3*n);
+for(let i=0;i<3*n;i++){p[i]=.5*(Math.random()-.5)*10;v[i]=.5*(Math.random()-.5)*.02}
+g.setAttribute('position',new T.BufferAttribute(p,3));
+const P=new T.Points(g,new T.PointsMaterial({size:.05,color:0xb233ff,transparent:!0,opacity:.8}));s.add(P);
+let l=new T.BufferGeometry,h=[],w=null,L=new T.LineSegments(l,new T.LineBasicMaterial({color:0xb233ff,transparent:!0,opacity:.3}));s.add(L);
+new T.TextureLoader().load('public/mozzart.png',x=>{w=new T.Mesh(new T.PlaneGeometry(5,4),new T.MeshBasicMaterial({map:x,transparent:!0,side:T.DoubleSide}));s.add(w)});
+const U=()=>{if(w){u+=f?.002:-.002;f=u>=t?(u=t,!1):u<=0?(u=0,!0):f;w.rotation.y=u}
+const o=g.attributes.position.array;for(let i=0;i<3*n;i++){o[i]+=v[i];Math.abs(o[i])>5&&(v[i]*=-1)}
+g.attributes.position.needsUpdate=!0;h=[];
+for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const[x1,y1,z1]=[o[3*i],o[3*i+1],o[3*i+2]],[x2,y2,z2]=[o[3*j],o[3*j+1],o[3*j+2]],d=Math.hypot(x2-x1,y2-y1,z2-z1);d<2&&h.push(x1,y1,z1,x2,y2,z2)}
+l.dispose();l=new T.BufferGeometry;l.setAttribute('position',new T.Float32BufferAttribute(h,3));r.render(s,m)};
+const R=()=>{m.aspect=c.clientWidth/c.clientHeight;m.updateProjectionMatrix();r.setSize(c.clientWidth,c.clientHeight)};
+window.addEventListener('resize',R);r.setAnimationLoop(U);R();

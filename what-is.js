@@ -1,81 +1,23 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-// Get the container element
-const container = document.getElementById('what-is');
-if (!container) {
-    console.error('Container element with id "hero" not found');
-    throw new Error('Container element not found');
-}
-
-const scene = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true
-});
-const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-const loader = new GLTFLoader();
-
-// Set background color
-scene.background = new THREE.Color(0x1a1a1a);
-
-// Add lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 15);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 10);
-directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);
-
-// Set renderer size to match container
-renderer.setSize(container.clientWidth, container.clientHeight);
-container.appendChild(renderer.domElement);
-
-let globets = null;
-camera.position.z = 5;
-
-// Load a glTF resource
-loader.load('public/brass_goblets/brass_goblets.gltf', function (gltf) {
-    globets = gltf.scene;
-    scene.add(gltf.scene);
-
-    // Center the model
-    const box = new THREE.Box3().setFromObject(gltf.scene);
-    const center = box.getCenter(new THREE.Vector3());
-    gltf.scene.position.x += -center.x;
-    gltf.scene.position.y += -center.y;
-    gltf.scene.position.z += -center.z;
-
-    // Optional: Adjust the camera to frame the model
-    const size = box.getSize(new THREE.Vector3());
-    const maxDim = Math.max(size.x, size.y, size.z);
-    camera.position.z = maxDim * 2;
-
-
-}, undefined, function (error) {
-    console.error(error);
-});
-
-function animate() {
-    if (globets !== null) {
-        globets.rotation.y += 0.01;
-    }
-
-    renderer.render(scene, camera);
-}
-
-// Resize handler now uses container dimensions
-function onWindowResize() {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-}
-
-// Add event listener for window resize
-window.addEventListener('resize', onWindowResize);
-
-// Start animation loop
-renderer.setAnimationLoop(animate);
-
-// Initial resize
-onWindowResize();
+import*as T from'three';import{GLTFLoader}from'three/addons/loaders/GLTFLoader.js';import{OrbitControls}from'three/addons/controls/OrbitControls.js';
+const c=document.getElementById('what-is');if(!c)throw'No container';
+let l,m;
+const s=new T.Scene,r=new T.WebGLRenderer({antialias:!0,alpha:!0}),a=new T.PerspectiveCamera(75,c.clientWidth/c.clientHeight,1,1e3);
+a.position.z=120;
+const t=new T.TextureLoader,o=new OrbitControls(a,r.domElement);
+o.minDistance=50;o.maxDistance=200;
+s.background=new T.Color(0x1a1a1a);s.add(new T.AmbientLight(0x666666));
+const d1=new T.DirectionalLight(0xffddcc,3);d1.position.set(1,.75,5);s.add(d1);
+const d2=new T.DirectionalLight(0xccccff,3);d2.position.set(2,.75,-5);s.add(d2);
+l=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3,new T.Vector3]),new T.LineBasicMaterial);s.add(l);
+let f=!0,q=Math.PI/4,u=0;
+(()=>{const p=t.load('public/head/Map-COL.jpg');p.colorSpace=T.SRGBColorSpace;
+new GLTFLoader().load('public/head/head.glb',g=>{m=g.scene.children[0];
+m.material=new T.MeshPhongMaterial({specular:0x111111,map:p,specularMap:t.load('public/head/Map-SPEC.jpg'),normalMap:t.load('pulbic/head/Infinite-Level_02_Tangent_SmoothUV.jpg'),shininess:25});
+s.add(m);m.scale.multiplyScalar(10);
+const b=new T.Box3().setFromObject(m),c=b.getCenter(new T.Vector3());
+g.scene.position.x-=c.x;g.scene.position.y-=c.y;g.scene.position.z-=c.z;
+a.position.z=Math.max(...b.getSize(new T.Vector3()).toArray())})})();
+r.setSize(c.clientWidth,c.clientHeight);c.appendChild(r.domElement);
+const A=()=>{if(m){u+=f?.002:-.002;f=u>=q?(u=q,!1):u<=0?(u=0,!0):f;m.rotation.y=u}r.render(s,a)},
+R=()=>{a.aspect=c.clientWidth/c.clientHeight;a.updateProjectionMatrix();r.setSize(c.clientWidth,c.clientHeight)};
+window.addEventListener('resize',R);r.setAnimationLoop(A);R();
